@@ -1,6 +1,8 @@
 package footballApiClient
 
 import (
+	"encoding/json"
+	"io"
 	"net/http"
 	"time"
 )
@@ -69,5 +71,16 @@ func (c *FootballApiClient) GetAllTodaysMatches() ([]Match, error) {
 		return nil, err
 	}
 	req.Header.Add("X-Auth-Token", c.authKey)
-	return nil, nil
+
+	resp, err := c.client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	defer resp.Body.Close()
+	body, err := io.ReadAll(resp.Body)
+
+	res := &matchesCallResult{}
+	json.Unmarshal(body, &res)
+	return res.Matches, nil
 }
