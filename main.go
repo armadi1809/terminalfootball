@@ -17,5 +17,13 @@ func main() {
 	authKey := os.Getenv("AUTH_KEY")
 	client := footballApiClient.New(authKey)
 
-	fmt.Println(client.GetAllTodaysMatches())
+	matches, err := client.GetAllTodaysMatches()
+
+	if err != nil {
+		log.Fatal("Could not get fixtures")
+	}
+
+	for _, match := range matches {
+		fmt.Printf("%s %d - %d %s\n", match.HomeTeam.Name, match.Score.FullTime.Home, match.Score.FullTime.Away, match.AwayTeam.Name)
+	}
 }
