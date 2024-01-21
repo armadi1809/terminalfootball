@@ -1,0 +1,5 @@
+package terminalfootballcmd
+
+func getTodaysGames() {
+
+}
