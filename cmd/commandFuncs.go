@@ -1,5 +1,0 @@
-package terminalfootballcmd
-
-func getTodaysGames() {
-
-}

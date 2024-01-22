@@ -4,10 +4,11 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"net/url"
 	"time"
 )
 
-const baseUrl string = "https://api.football-data.org/v4/matches"
+const baseUrl string = "https://api.football-data.org/v4"
 
 type FootballApiClient struct {
 	authKey string
@@ -66,7 +67,7 @@ func New(authKey string) *FootballApiClient {
 }
 
 func (c *FootballApiClient) GetAllTodaysMatches() ([]Match, error) {
-	req, err := http.NewRequest("GET", baseUrl, nil)
+	req, err := http.NewRequest("GET", baseUrl+"/matches", nil)
 	if err != nil {
 		return nil, err
 	}
@@ -83,4 +84,42 @@ func (c *FootballApiClient) GetAllTodaysMatches() ([]Match, error) {
 	res := &matchesCallResult{}
 	json.Unmarshal(body, &res)
 	return res.Matches, nil
+}
+
+func (c *FootballApiClient) GetTodayMatchesForLeagues(leagues []string) ([]Match, error) {
+	req, err := http.NewRequest("GET", baseUrl+"/matches", nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Add("X-Auth-Token", c.authKey)
+
+	q := &url.Values{
+		"competitions": leagues,
+	}
+
+	req.URL.RawQuery = q.Encode()
+	resp, err := c.client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	defer resp.Body.Close()
+	body, err := io.ReadAll(resp.Body)
+
+	res := &matchesCallResult{}
+	json.Unmarshal(body, &res)
+	return res.Matches, nil
+}
+
+func constructLeagueQueries(leagues []string) string {
+	query := ""
+
+	for _, league := range leagues {
+		if query == "" {
+			query += league
+			continue
+		}
+		query += "," + league
+	}
+	return query
 }
