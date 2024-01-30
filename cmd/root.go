@@ -4,11 +4,14 @@ Copyright © 2024 Aziz Rmadi azizrmadi@gmail.com
 package terminalfootballcmd
 
 import (
-	"fmt"
 	"log"
 	"os"
+	"strconv"
 
+	"github.com/armadi1809/terminalfootball/cmd/ui"
 	"github.com/armadi1809/terminalfootball/footballApiClient"
+	"github.com/charmbracelet/bubbles/table"
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/spf13/cobra"
 )
 
@@ -24,8 +27,9 @@ var rootCmd = &cobra.Command{
 			log.Fatal("Could not get fixtures")
 		}
 
-		for _, match := range matches {
-			fmt.Printf("%s %d - %d %s\n", match.HomeTeam.Name, match.Score.FullTime.Home, match.Score.FullTime.Away, match.AwayTeam.Name)
+		err = renderMatches(matches)
+		if err != nil {
+			log.Fatalf("An Error Occurred When Rendering the Games Table: %s", err.Error())
 		}
 	},
 }
@@ -48,4 +52,20 @@ func init() {
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
+}
+
+func renderMatches(matches []footballApiClient.Match) error {
+	rows := []table.Row{}
+
+	for _, match := range matches {
+		row := table.Row{match.HomeTeam.Name, strconv.Itoa(match.Score.FullTime.Home) + " - " + strconv.Itoa(match.Score.FullTime.Away), match.AwayTeam.Name}
+		rows = append(rows, row)
+	}
+	table := ui.NewTable(rows)
+
+	if _, err := tea.NewProgram(table).Run(); err != nil {
+		return err
+	}
+
+	return nil
 }
