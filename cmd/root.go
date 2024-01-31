@@ -16,7 +16,7 @@ import (
 )
 
 // rootCmd represents the base command when called without any subcommands
-var RootCmd = &cobra.Command{
+var rootCmd = &cobra.Command{
 	Use:   "terminalfootball",
 	Short: "A CLI to get the latest scores in soccer world",
 	Run: func(cmd *cobra.Command, args []string) {
@@ -34,27 +34,6 @@ var RootCmd = &cobra.Command{
 	},
 }
 
-// Execute adds all child commands to the root command and sets flags appropriately.
-// This is called by main.main(). It only needs to happen once to the rootCmd.
-// func Execute() error {
-// 	err := rootCmd.Execute()
-// 	if err != nil {
-// 		return err
-// 	}
-// 	return nil
-// }
-
-func init() {
-	// Here you will define your flags and configuration settings.
-	// Cobra supports persistent flags, which, if defined here,
-	// will be global for your application.
-
-	// rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.terminalfootball.yaml)")
-
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
-}
-
 func renderMatches(cmd *cobra.Command, matches []footballApiClient.Match) error {
 	rows := []table.Row{}
 
@@ -63,10 +42,13 @@ func renderMatches(cmd *cobra.Command, matches []footballApiClient.Match) error 
 		rows = append(rows, row)
 	}
 	table := ui.NewTable(rows)
-
-	if _, err := tea.NewProgram(table).Run(); err != nil {
+	if _, err := tea.NewProgram(table, tea.WithOutput(cmd.Root().OutOrStdout()), tea.WithInput(cmd.Root().InOrStdin())).Run(); err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func GetRoot() *cobra.Command {
+	return rootCmd
 }

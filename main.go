@@ -12,7 +12,7 @@ import (
 	"syscall"
 	"time"
 
-	cmd "github.com/armadi1809/terminalfootball/cmd"
+	terminalfootballcmd "github.com/armadi1809/terminalfootball/cmd"
 	"github.com/charmbracelet/log"
 	"github.com/charmbracelet/ssh"
 	"github.com/charmbracelet/wish"
@@ -22,7 +22,7 @@ import (
 
 const (
 	host = "localhost"
-	port = 23235
+	port = 23236
 )
 
 func main() {
@@ -31,6 +31,7 @@ func main() {
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
+	cmd := terminalfootballcmd.GetRoot()
 	s, err := wish.NewServer(
 		wish.WithAddress(fmt.Sprintf("%s:%d", host, port)),
 		wish.WithHostKeyPath(".ssh/term_info_ed25519"),
@@ -38,12 +39,12 @@ func main() {
 			func(h ssh.Handler) ssh.Handler {
 				return func(s ssh.Session) {
 
-					cmd.RootCmd.SetArgs(s.Command())
-					cmd.RootCmd.SetIn(s)
-					cmd.RootCmd.SetOut(s)
-					cmd.RootCmd.SetErr(s.Stderr())
-					cmd.RootCmd.CompletionOptions.DisableDefaultCmd = true
-					if err := cmd.RootCmd.Execute(); err != nil {
+					cmd.SetArgs(s.Command())
+					cmd.SetIn(s)
+					cmd.SetOut(s)
+					cmd.SetErr(s.Stderr())
+					cmd.CompletionOptions.DisableDefaultCmd = true
+					if err := cmd.Execute(); err != nil {
 						_ = s.Exit(1)
 						return
 					}
