@@ -38,5 +38,4 @@ to quickly create a Cobra application.`,
 
 func init() {
 	rootCmd.AddCommand(leaguesCmd)
-	leaguesCmd.Flags().String("leagues", "", "Define the leagues you want to see matches of")
 }

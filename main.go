@@ -31,14 +31,14 @@ func main() {
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
-	cmd := terminalfootballcmd.GetRoot()
+
 	s, err := wish.NewServer(
 		wish.WithAddress(fmt.Sprintf("%s:%d", host, port)),
 		wish.WithHostKeyPath(".ssh/term_info_ed25519"),
 		wish.WithMiddleware(
 			func(h ssh.Handler) ssh.Handler {
 				return func(s ssh.Session) {
-
+					cmd := terminalfootballcmd.GetRoot()
 					cmd.SetArgs(s.Command())
 					cmd.SetIn(s)
 					cmd.SetOut(s)
