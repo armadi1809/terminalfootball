@@ -36,7 +36,6 @@ var rootCmd = &cobra.Command{
 
 func renderMatches(cmd *cobra.Command, matches []footballApiClient.Match) error {
 	rows := []table.Row{}
-
 	for _, match := range matches {
 		row := table.Row{match.HomeTeam.Name, strconv.Itoa(match.Score.FullTime.Home) + " - " + strconv.Itoa(match.Score.FullTime.Away), match.AwayTeam.Name}
 		rows = append(rows, row)

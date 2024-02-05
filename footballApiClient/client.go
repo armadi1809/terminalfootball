@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 )
 
@@ -105,7 +106,7 @@ func (c *FootballApiClient) GetTodayMatchesForLeagues(leagues []string) ([]Match
 	req.Header.Add("X-Auth-Token", c.authKey)
 
 	q := &url.Values{
-		"competitions": leagues,
+		"competitions": []string{strings.Join(leagues, ",")},
 	}
 
 	req.URL.RawQuery = q.Encode()
