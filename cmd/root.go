@@ -27,45 +27,36 @@ var rootCmd = &cobra.Command{
 			log.Fatal("Could not get fixtures")
 		}
 
-		err = renderMatches(matches)
+		err = renderMatches(cmd, matches)
 		if err != nil {
 			log.Fatalf("An Error Occurred When Rendering the Games Table: %s", err.Error())
 		}
 	},
 }
 
-// Execute adds all child commands to the root command and sets flags appropriately.
-// This is called by main.main(). It only needs to happen once to the rootCmd.
-func Execute() {
-	err := rootCmd.Execute()
-	if err != nil {
-		os.Exit(1)
-	}
-}
-
-func init() {
-	// Here you will define your flags and configuration settings.
-	// Cobra supports persistent flags, which, if defined here,
-	// will be global for your application.
-
-	// rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.terminalfootball.yaml)")
-
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
-}
-
-func renderMatches(matches []footballApiClient.Match) error {
+func renderMatches(cmd *cobra.Command, matches []footballApiClient.Match) error {
 	rows := []table.Row{}
-
 	for _, match := range matches {
 		row := table.Row{match.HomeTeam.Name, strconv.Itoa(match.Score.FullTime.Home) + " - " + strconv.Itoa(match.Score.FullTime.Away), match.AwayTeam.Name}
 		rows = append(rows, row)
 	}
 	table := ui.NewTable(rows)
-
-	if _, err := tea.NewProgram(table).Run(); err != nil {
+	if _, err := tea.NewProgram(table, tea.WithOutput(cmd.Root().OutOrStdout()), tea.WithInput(cmd.Root().InOrStdin())).Run(); err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func GetRoot() *cobra.Command {
+	return rootCmd
+}
+
+func createMatchLeagueMap(matches []footballApiClient.Match) (map[string][]footballApiClient.Match, error) {
+	res := make(map[string][]footballApiClient.Match)
+
+	for _, match := range matches {
+		res[match.Competition.Name] = append(res[match.Competition.Name], match)
+	}
+	return res, nil
 }

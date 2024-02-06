@@ -3,8 +3,10 @@ package footballApiClient
 import (
 	"encoding/json"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 )
 
@@ -69,20 +71,30 @@ func New(authKey string) *FootballApiClient {
 func (c *FootballApiClient) GetAllTodaysMatches() ([]Match, error) {
 	req, err := http.NewRequest("GET", baseUrl+"/matches", nil)
 	if err != nil {
+		log.Println("Unable to create request")
 		return nil, err
 	}
 	req.Header.Add("X-Auth-Token", c.authKey)
 
 	resp, err := c.client.Do(req)
 	if err != nil {
+		log.Println("Failed to send request to server")
 		return nil, err
 	}
 
 	defer resp.Body.Close()
 	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Println("Failed to read server response")
+		return nil, err
+	}
 
 	res := &matchesCallResult{}
-	json.Unmarshal(body, &res)
+	err = json.Unmarshal(body, &res)
+	if err != nil {
+		log.Println("Failed to unmarshal server response")
+		return nil, err
+	}
 	return res.Matches, nil
 }
 
@@ -94,7 +106,7 @@ func (c *FootballApiClient) GetTodayMatchesForLeagues(leagues []string) ([]Match
 	req.Header.Add("X-Auth-Token", c.authKey)
 
 	q := &url.Values{
-		"competitions": leagues,
+		"competitions": []string{strings.Join(leagues, ",")},
 	}
 
 	req.URL.RawQuery = q.Encode()
