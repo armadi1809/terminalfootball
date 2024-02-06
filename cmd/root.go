@@ -51,3 +51,12 @@ func renderMatches(cmd *cobra.Command, matches []footballApiClient.Match) error 
 func GetRoot() *cobra.Command {
 	return rootCmd
 }
+
+func createMatchLeagueMap(matches []footballApiClient.Match) (map[string][]footballApiClient.Match, error) {
+	res := make(map[string][]footballApiClient.Match)
+
+	for _, match := range matches {
+		res[match.Competition.Name] = append(res[match.Competition.Name], match)
+	}
+	return res, nil
+}
