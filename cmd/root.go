@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/armadi1809/terminalfootball/cmd/ui"
 	"github.com/armadi1809/terminalfootball/footballApiClient"
@@ -15,13 +16,32 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var dateLayout string = "2006-01-02"
+
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "terminalfootball",
 	Short: "A CLI to get the latest scores in soccer world",
 	Run: func(cmd *cobra.Command, args []string) {
 		apiClient := footballApiClient.New(os.Getenv("AUTH_KEY"))
-		matches, err := apiClient.GetAllTodaysMatches()
+
+		dateFlag, err := cmd.Flags().GetString("date")
+		if err != nil {
+			log.Fatalf("ubanle to parse the provided date %v", err)
+		}
+		dayAfterDateFlag := ""
+		if dateFlag != "" {
+			date, err := time.Parse(dateLayout, dateFlag)
+			if err != nil {
+				log.Fatalf("error parsing date: %v", err)
+				return
+			}
+
+			date = date.AddDate(0, 0, 1)
+			dayAfterDateFlag = date.Format(dateLayout)
+		}
+
+		matches, err := apiClient.GetAllTodaysMatches(dateFlag, dayAfterDateFlag)
 
 		if err != nil {
 			log.Fatal("Could not get fixtures")
@@ -34,6 +54,9 @@ var rootCmd = &cobra.Command{
 	},
 }
 
+func init() {
+	rootCmd.PersistentFlags().StringP("date", "d", "", "The date matches are retrieved for")
+}
 func renderMatches(cmd *cobra.Command, matches []footballApiClient.Match) error {
 	rows := []table.Row{}
 	for _, match := range matches {

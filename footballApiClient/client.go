@@ -68,7 +68,7 @@ func New(authKey string) *FootballApiClient {
 	return &FootballApiClient{authKey: authKey, client: &http.Client{}}
 }
 
-func (c *FootballApiClient) GetAllTodaysMatches() ([]Match, error) {
+func (c *FootballApiClient) GetAllTodaysMatches(dateFrom, dateTo string) ([]Match, error) {
 	req, err := http.NewRequest("GET", baseUrl+"/matches", nil)
 	if err != nil {
 		log.Println("Unable to create request")
@@ -76,6 +76,11 @@ func (c *FootballApiClient) GetAllTodaysMatches() ([]Match, error) {
 	}
 	req.Header.Add("X-Auth-Token", c.authKey)
 
+	q := &url.Values{
+		"dateFrom": []string{dateFrom},
+		"dateTo":   []string{dateTo},
+	}
+	req.URL.RawQuery = q.Encode()
 	resp, err := c.client.Do(req)
 	if err != nil {
 		log.Println("Failed to send request to server")
