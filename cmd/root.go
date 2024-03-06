@@ -22,6 +22,10 @@ var dateLayout string = "2006-01-02"
 var rootCmd = &cobra.Command{
 	Use:   "terminalfootball",
 	Short: "A CLI to get the latest scores in soccer world",
+}
+var allCmd = &cobra.Command{
+	Use:   "all",
+	Short: "Get all games today or at the specified date",
 	Run: func(cmd *cobra.Command, args []string) {
 		apiClient := footballApiClient.New(os.Getenv("AUTH_KEY"))
 
@@ -56,6 +60,7 @@ var rootCmd = &cobra.Command{
 
 func init() {
 	rootCmd.PersistentFlags().StringP("date", "d", "", "The date matches are retrieved for")
+	rootCmd.AddCommand(allCmd)
 }
 func renderMatches(cmd *cobra.Command, matches []footballApiClient.Match) error {
 	rows := []table.Row{}
@@ -73,13 +78,4 @@ func renderMatches(cmd *cobra.Command, matches []footballApiClient.Match) error 
 
 func GetRoot() *cobra.Command {
 	return rootCmd
-}
-
-func createMatchLeagueMap(matches []footballApiClient.Match) (map[string][]footballApiClient.Match, error) {
-	res := make(map[string][]footballApiClient.Match)
-
-	for _, match := range matches {
-		res[match.Competition.Name] = append(res[match.Competition.Name], match)
-	}
-	return res, nil
 }

@@ -103,7 +103,7 @@ func (c *FootballApiClient) GetAllTodaysMatches(dateFrom, dateTo string) ([]Matc
 	return res.Matches, nil
 }
 
-func (c *FootballApiClient) GetTodayMatchesForLeagues(leagues []string) ([]Match, error) {
+func (c *FootballApiClient) GetTodayMatchesForLeagues(leagues []string, dateFrom string, dateTo string) ([]Match, error) {
 	req, err := http.NewRequest("GET", baseUrl+"/matches", nil)
 	if err != nil {
 		return nil, err
@@ -112,6 +112,8 @@ func (c *FootballApiClient) GetTodayMatchesForLeagues(leagues []string) ([]Match
 
 	q := &url.Values{
 		"competitions": []string{strings.Join(leagues, ",")},
+		"dateFrom":     []string{dateFrom},
+		"dateTo":       []string{dateTo},
 	}
 
 	req.URL.RawQuery = q.Encode()
@@ -122,21 +124,11 @@ func (c *FootballApiClient) GetTodayMatchesForLeagues(leagues []string) ([]Match
 
 	defer resp.Body.Close()
 	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
 
 	res := &matchesCallResult{}
 	json.Unmarshal(body, &res)
 	return res.Matches, nil
-}
-
-func constructLeagueQueries(leagues []string) string {
-	query := ""
-
-	for _, league := range leagues {
-		if query == "" {
-			query += league
-			continue
-		}
-		query += "," + league
-	}
-	return query
 }

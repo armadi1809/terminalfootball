@@ -6,6 +6,7 @@ package terminalfootballcmd
 import (
 	"log"
 	"os"
+	"time"
 
 	"github.com/armadi1809/terminalfootball/footballApiClient"
 	"github.com/spf13/cobra"
@@ -23,7 +24,22 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		apiClient := footballApiClient.New(os.Getenv("AUTH_KEY"))
-		matches, err := apiClient.GetTodayMatchesForLeagues(args)
+		dateFlag, err := cmd.Flags().GetString("date")
+		if err != nil {
+			log.Fatalf("ubanle to parse the provided date %v", err)
+		}
+		dayAfterDateFlag := ""
+		if dateFlag != "" {
+			date, err := time.Parse(dateLayout, dateFlag)
+			if err != nil {
+				log.Fatalf("error parsing date: %v", err)
+				return
+			}
+
+			date = date.AddDate(0, 0, 1)
+			dayAfterDateFlag = date.Format(dateLayout)
+		}
+		matches, err := apiClient.GetTodayMatchesForLeagues(args, dateFlag, dayAfterDateFlag)
 
 		if err != nil {
 			log.Fatal("Could not get fixtures")

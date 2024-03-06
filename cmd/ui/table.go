@@ -7,9 +7,9 @@ import (
 )
 
 var columns = []table.Column{
-	{Title: "Home Team", Width: 20},
+	{Title: "Home Team", Width: 40},
 	{Title: "Score", Width: 10},
-	{Title: "Away Team", Width: 20},
+	{Title: "Away Team", Width: 40},
 }
 
 var baseStyle = lipgloss.NewStyle().
